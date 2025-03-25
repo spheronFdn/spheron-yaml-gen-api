@@ -7,10 +7,10 @@ services:
       dockerfile: Dockerfile
     image: spheronfdn/spheron-yaml-gen-api:latest
     ports:
-      - "3000:3000"
+      - "8080:8080"
     environment:
-      - NODE_ENV=production
-      - PORT=3000
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
     restart: unless-stopped
     volumes:
