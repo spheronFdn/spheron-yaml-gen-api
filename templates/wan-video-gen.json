@@ -1,0 +1,71 @@
+{
+  "id": "wan-video-gen",
+  "description": "Deploys WAN2.1 text-to-video generation model with Gradio interface",
+  "tags": [
+    "text-to-video",
+    "ai-model", 
+    "gpu-required",
+    "web-ui"
+  ],
+  "use_cases": [
+    "AI video generation",
+    "Text to video conversion",
+    "Video content creation"
+  ],
+  "base_yaml": "version: \"1.0\"\n\nservices:\n  wan-gradio:\n    image: spheronnetwork/jupyter-notebook:pytorch-2.4.1-cuda-enabled\n    pull_policy: IfNotPresent\n    expose:\n      - port: 7860\n        as: 7860\n        to:\n          - global: true\n      - port: 8888\n        as: 8888\n        to:\n          - global: true\n    env:\n      - JUPYTER_TOKEN={{jupyter_token}}\n      - PYTHONUNBUFFERED=1\n    command:\n      - \"bash\"\n      - \"-c\"\n      - |\n        jupyter notebook --allow-root --ip=0.0.0.0 --NotebookApp.token={{jupyter_token}} --no-browser > /tmp/jupyter.log 2>&1 &\n        \n        apt-get update && apt-get install -y git wget libgl1 libglib2.0-0 || true\n        pip install --upgrade pip\n        \n        cd /home/jovyan\n        if [ ! -d \"Wan2.1\" ]; then\n          git clone https://github.com/Wan-Video/Wan2.1.git\n        fi\n        cd Wan2.1\n        \n        pip install -r requirements.txt\n        \n        if [ ! -d \"Wan2.1-T2V-1.3B\" ]; then\n          pip install \"huggingface_hub[cli]\"\n          huggingface-cli download Wan-AI/Wan2.1-T2V-1.3B --local-dir ./Wan2.1-T2V-1.3B\n          mkdir -p gradio/Wan2.1-T2V-1.3B\n          ln -sf /home/jovyan/Wan2.1/Wan2.1-T2V-1.3B/* /home/jovyan/Wan2.1/gradio/Wan2.1-T2V-1.3B/\n        fi\n        \n        cd /home/jovyan/Wan2.1/gradio\n        sed -i 's/server_port=7860/server_port=7860/g' t2v_1.3B_singleGPU.py\n        \n        echo \"Starting Wan2.1 Gradio interface...\"\n        python t2v_1.3B_singleGPU.py --ckpt_dir /home/jovyan/Wan2.1/Wan2.1-T2V-1.3B --prompt_extend_method 'local_qwen' > /tmp/gradio.log 2>&1 &\n        \n        tail -f /tmp/gradio.log &\n        \n        echo \"Services started. Container will remain running.\"\n        echo \"Jupyter is accessible on port 8888 with token '{{jupyter_token}}'\"\n        echo \"Wan2.1 Gradio interface should be accessible on port 7860\"\n        \n        while true; do\n          sleep 60\n          echo \"Container is running. Wan2.1 Gradio interface should be accessible on port 7860.\"\n        done\n\nprofiles:\n  name: wan-gradio\n  duration: {{duration}}\n  mode: provider\n  compute:\n    wan-gradio:\n      resources:\n        cpu:\n          units: {{cpu_units}}\n        memory:\n          size: {{memory_size}}\n        storage:\n          size: {{storage_size}}\n        gpu:\n          units: 1\n          attributes:\n            vendor:\n              nvidia:\n                - model: {{gpu_model}}\n  placement:\n    {{region}}:\n      attributes:\n      pricing:\n        wan-gradio:\n          token: CST\n          amount: {{price_amount}}\n\ndeployment:\n  wan-gradio:\n    {{region}}:\n      profile: wan-gradio\n      count: 1",
+  "parameters": {
+    "duration": {
+      "type": "duration",
+      "default": "1h",
+      "description": "Duration for the deployment"
+    },
+    "cpu_units": {
+      "type": "integer",
+      "default": 4,
+      "description": "Number of CPU units",
+      "min": 2,
+      "max": 16
+    },
+    "memory_size": {
+      "type": "string",
+      "default": "8Gi",
+      "description": "Memory allocation",
+      "options": ["4Gi", "8Gi", "16Gi", "32Gi"]
+    },
+    "storage_size": {
+      "type": "string",
+      "default": "120Gi",
+      "description": "Storage allocation",
+      "options": ["80Gi", "120Gi", "250Gi", "500Gi"]
+    },
+    "gpu_model": {
+      "type": "string",
+      "default": "rtx4090",
+      "description": "GPU model to use",
+      "options": ["rtx4090", "a100", "rtx6000-ada"]
+    },
+    "region": {
+      "type": "string",
+      "default": "westcoast",
+      "description": "Deployment region",
+      "options": ["westcoast", "eastcoast", "europe"]
+    },
+    "jupyter_token": {
+      "type": "string",
+      "default": "test",
+      "description": "Token for Jupyter notebook access"
+    },
+    "price_amount": {
+      "type": "number",
+      "default": 1,
+      "description": "Price amount in CST tokens",
+      "min": 0.1
+    }
+  },
+  "example_requests": [
+    "Deploy WAN2.1 for video generation",
+    "I need a text to video service with RTX 4090",
+    "Setup WAN model for video creation with 16GB memory",
+    "Deploy video generation model in Europe region"
+  ]
+}

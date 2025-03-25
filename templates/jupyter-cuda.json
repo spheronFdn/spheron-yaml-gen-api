@@ -1,0 +1,72 @@
+{
+  "id": "jupyter-cuda",
+  "description": "Jupyter Notebook with CUDA GPU support for development and ML workflows",
+  "tags": [
+    "jupyter",
+    "notebook",
+    "gpu-required",
+    "development",
+    "machine-learning"
+  ],
+  "use_cases": [
+    "Machine learning development",
+    "Data analysis",
+    "Prototyping",
+    "CUDA-accelerated computing"
+  ],
+  "base_yaml": "version: \"1.0\"\n\nservices:\n  py-cuda:\n    image: spheronnetwork/jupyter-notebook:pytorch-2.4.1-cuda-enabled\n    pull_policy: IfNotPresent\n    expose:\n      - port: 8888\n        as: 8888\n        to:\n          - global: true\n      - port: 3000\n        as: 3000\n        to:\n          - global: true\n    env:\n      - JUPYTER_TOKEN={{jupyter_token}}\n\nprofiles:\n  name: py-cuda\n  duration: {{duration}}\n  mode: provider\n  compute:\n    py-cuda:\n      resources:\n        cpu:\n          units: {{cpu_units}}\n        memory:\n          size: {{memory_size}}\n        storage:\n          - size: {{storage_size}}\n        gpu:\n          units: 1\n          attributes:\n            vendor:\n              nvidia:\n                - model: {{gpu_model}}\n  placement:\n    {{region}}:\n      attributes:\n        region_exclude: china\n      pricing:\n        py-cuda:\n          token: CST\n          amount: {{price_amount}}\n\ndeployment:\n  py-cuda:\n    {{region}}:\n      profile: py-cuda\n      count: 1",
+  "parameters": {
+    "duration": {
+      "type": "duration",
+      "default": "1h",
+      "description": "Duration for the notebook session"
+    },
+    "cpu_units": {
+      "type": "integer",
+      "default": 4,
+      "description": "Number of CPU units allocated",
+      "min": 2,
+      "max": 16
+    },
+    "memory_size": {
+      "type": "string",
+      "default": "16Gi",
+      "description": "Memory allocation",
+      "options": ["8Gi", "16Gi", "32Gi"]
+    },
+    "storage_size": {
+      "type": "string",
+      "default": "120Gi",
+      "description": "Storage allocation",
+      "options": ["80Gi", "120Gi", "250Gi"]
+    },
+    "gpu_model": {
+      "type": "string",
+      "default": "rtx4090",
+      "description": "GPU model for accelerated computing",
+      "options": ["rtx4090", "a100", "rtx6000-ada"]
+    },
+    "region": {
+      "type": "string",
+      "default": "westcoast",
+      "description": "Deployment region",
+      "options": ["westcoast", "eastcoast", "europe"]
+    },
+    "jupyter_token": {
+      "type": "string",
+      "default": "secure_token",
+      "description": "Access token for Jupyter notebook security"
+    },
+    "price_amount": {
+      "type": "number",
+      "default": 1,
+      "description": "Price in CST tokens per hour",
+      "min": 0.1
+    }
+  },
+  "example_requests": [
+    "Deploy Jupyter notebook with RTX 4090 GPU",
+    "Start CUDA-enabled notebook with 32GB memory",
+    "Create development environment with Jupyter and GPU support"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "id": "blender-gpu",
+  "description": "Deploys Blender with GPU acceleration for 3D rendering and modeling",
+  "tags": [
+    "3d-rendering",
+    "gpu-required",
+    "development",
+    "content-creation"
+  ],
+  "use_cases": [
+    "3D modeling",
+    "Animation rendering",
+    "Visual effects",
+    "Architectural visualization"
+  ],
+  "base_yaml": "version: \"1.0\"\n\nservices:\n  blender:\n    image: linuxserver/blender\n    pull_policy: IfNotPresent\n    expose:\n      - port: 8888\n        as: 8888\n        to:\n          - global: true\n      - port: 3000\n        as: 3000\n        to:\n          - global: true\n    env:\n      {{#if custom_env}}\n      {{custom_env}}\n      {{/if}}\n\nprofiles:\n  name: blender\n  duration: {{duration}}\n  mode: provider\n  compute:\n    blender:\n      resources:\n        cpu:\n          units: {{cpu_units}}\n        memory:\n          size: {{memory_size}}\n        storage:\n          - size: {{storage_size}}\n        gpu:\n          units: 1\n          attributes:\n            vendor:\n              nvidia:\n                - model: {{gpu_model}}\n  placement:\n    {{region}}:\n      pricing:\n        blender:\n          token: CST\n          amount: {{price_amount}}\n\ndeployment:\n  blender:\n    {{region}}:\n      profile: blender\n      count: 1",
+  "parameters": {
+    "duration": {
+      "type": "duration",
+      "default": "1h",
+      "description": "Duration for the deployment"
+    },
+    "cpu_units": {
+      "type": "integer",
+      "default": 16,
+      "description": "Number of CPU units",
+      "min": 8,
+      "max": 32
+    },
+    "memory_size": {
+      "type": "string",
+      "default": "64Gi",
+      "description": "Memory allocation",
+      "options": ["32Gi", "64Gi", "128Gi"]
+    },
+    "storage_size": {
+      "type": "string",
+      "default": "500Gi",
+      "description": "Storage allocation",
+      "options": ["250Gi", "500Gi", "1000Gi"]
+    },
+    "gpu_model": {
+      "type": "string",
+      "default": "rtx6000-ada",
+      "description": "GPU model to use",
+      "options": ["rtx4090", "rtx6000-ada", "a100"]
+    },
+    "region": {
+      "type": "string",
+      "default": "westcoast",
+      "description": "Deployment region",
+      "options": ["westcoast", "eastcoast", "europe"]
+    },
+    "price_amount": {
+      "type": "number",
+      "default": 1,
+      "description": "Price amount in CST tokens",
+      "min": 0.1
+    },
+    "custom_env": {
+      "type": "string",
+      "optional": true,
+      "description": "Custom environment variables",
+      "example": "BLENDER_ARGS='-b -P script.py'"
+    }
+  },
+  "example_requests": [
+    "Deploy Blender for 3D rendering",
+    "I need a GPU-accelerated Blender instance",
+    "Setup Blender with RTX 6000 for animation",
+    "Deploy Blender in Europe region with high memory"
+  ]
+}

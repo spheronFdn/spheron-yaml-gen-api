@@ -1,0 +1,73 @@
+{
+  "id": "hunyuan-3d",
+  "description": "Deploys Hunyuan3D-2 for text/image to 3D model generation",
+  "tags": [
+    "text-to-3d",
+    "image-to-3d",
+    "ai-model",
+    "gpu-required",
+    "web-ui"
+  ],
+  "use_cases": [
+    "3D model generation from text",
+    "3D model generation from images",
+    "AI-powered 3D content creation",
+    "Rapid prototyping"
+  ],
+  "base_yaml": "version: \"1.0\"\n\nservices:\n  hunyuan3d:\n    image: spheronnetwork/jupyter-notebook:pytorch-2.4.1-cuda-enabled\n    pull_policy: IfNotPresent\n    expose:\n      - port: 3000\n        as: 3000\n        to:\n          - global: true\n      - port: 8000\n        as: 8000\n        to:\n          - global: true\n    env:\n      - JUPYTER_TOKEN={{jupyter_token}}\n    command:\n      - \"bash\"\n      - \"-c\"\n      - |\n        git clone https://github.com/Tencent/Hunyuan3D-2.git\n        cd Hunyuan3D-2\n        pip install -r requirements.txt\n        cd hy3dgen/texgen/custom_rasterizer\n        python setup.py install\n        cd ../../..\n        cd hy3dgen/texgen/differentiable_renderer\n        python setup.py install\n        cd ../../..\n        python gradio_app.py --model_path tencent/Hunyuan3D-2 --subfolder hunyuan3d-dit-v2-0 --texgen_model_path tencent/Hunyuan3D-2 --port 3000 --host 0.0.0.0\n\nprofiles:\n  name: hunyuan3d\n  duration: {{duration}}\n  mode: provider\n  compute:\n    hunyuan3d:\n      resources:\n        cpu:\n          units: {{cpu_units}}\n        memory:\n          size: {{memory_size}}\n        storage:\n          size: {{storage_size}}\n        gpu:\n          units: 1\n          attributes:\n            vendor:\n              nvidia:\n                - model: {{gpu_model}}\n\n  placement:\n    {{region}}:\n      attributes:\n      pricing:\n        hunyuan3d:\n          token: CST\n          amount: {{price_amount}}\ndeployment:\n  hunyuan3d:\n    {{region}}:\n      profile: hunyuan3d\n      count: 1",
+  "parameters": {
+    "duration": {
+      "type": "duration",
+      "default": "1h",
+      "description": "Duration for the deployment"
+    },
+    "cpu_units": {
+      "type": "integer",
+      "default": 16,
+      "description": "Number of CPU units",
+      "min": 8,
+      "max": 32
+    },
+    "memory_size": {
+      "type": "string",
+      "default": "64Gi",
+      "description": "Memory allocation",
+      "options": ["32Gi", "64Gi", "128Gi"]
+    },
+    "storage_size": {
+      "type": "string",
+      "default": "500Gi",
+      "description": "Storage allocation",
+      "options": ["250Gi", "500Gi", "1000Gi"]
+    },
+    "gpu_model": {
+      "type": "string",
+      "default": "rtx6000-ada",
+      "description": "GPU model to use",
+      "options": ["rtx4090", "rtx6000-ada", "a100"]
+    },
+    "region": {
+      "type": "string",
+      "default": "westcoast",
+      "description": "Deployment region",
+      "options": ["westcoast", "eastcoast", "europe"]
+    },
+    "jupyter_token": {
+      "type": "string",
+      "default": "test",
+      "description": "Token for Jupyter notebook access"
+    },
+    "price_amount": {
+      "type": "number",
+      "default": 1,
+      "description": "Price amount in CST tokens",
+      "min": 0.1
+    }
+  },
+  "example_requests": [
+    "Deploy Hunyuan3D for 3D model generation",
+    "I need a text to 3D model service",
+    "Setup 3D generation model with high memory",
+    "Deploy Hunyuan3D with RTX 6000"
+  ]
+}

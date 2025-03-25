@@ -1,0 +1,72 @@
+{
+  "id": "stable-diffusion-webui",
+  "description": "Deploys Stable Diffusion WebUI with UltraRealistic checkpoint for high-quality image generation",
+  "tags": [
+    "text-to-image",
+    "ai-model",
+    "gpu-required",
+    "web-ui"
+  ],
+  "use_cases": [
+    "AI image generation",
+    "Text to image conversion",
+    "Digital art creation",
+    "Photo editing"
+  ],
+  "base_yaml": "version: \"1.0\"\n\nservices:\n  sd-webui:\n    image: spheronfdn/sd-jupyter:pytorch-2.4.1-cuda-enabled\n    pull_policy: IfNotPresent\n    expose:\n      - port: 7860\n        as: 7860\n        to:\n          - global: true\n      - port: 8888\n        as: 8888\n        to:\n          - global: true\n    env:\n      - JUPYTER_TOKEN={{jupyter_token}}\nprofiles:\n  name: stable-diffusion-webui\n  duration: {{duration}}\n  mode: provider\n  compute:\n    sd-webui:\n      resources:\n        cpu:\n          units: {{cpu_units}}\n        memory:\n          size: {{memory_size}}\n        storage:\n          size: {{storage_size}}\n        gpu:\n          units: 1\n          attributes:\n            vendor:\n              nvidia:\n                - model: {{gpu_model}}\n  placement:\n    {{region}}:\n      attributes:\n      pricing:\n        sd-webui:\n          token: CST\n          amount: {{price_amount}}\n\ndeployment:\n  sd-webui:\n    {{region}}:\n      profile: sd-webui\n      count: 1",
+  "parameters": {
+    "duration": {
+      "type": "duration",
+      "default": "1h",
+      "description": "Duration for the deployment"
+    },
+    "cpu_units": {
+      "type": "integer",
+      "default": 16,
+      "description": "Number of CPU units",
+      "min": 8,
+      "max": 32
+    },
+    "memory_size": {
+      "type": "string",
+      "default": "64Gi",
+      "description": "Memory allocation",
+      "options": ["32Gi", "64Gi", "128Gi"]
+    },
+    "storage_size": {
+      "type": "string",
+      "default": "500Gi",
+      "description": "Storage allocation",
+      "options": ["250Gi", "500Gi", "1000Gi"]
+    },
+    "gpu_model": {
+      "type": "string",
+      "default": "rtx6000-ada",
+      "description": "GPU model to use",
+      "options": ["rtx4090", "rtx6000-ada", "a100"]
+    },
+    "region": {
+      "type": "string",
+      "default": "westcoast",
+      "description": "Deployment region",
+      "options": ["westcoast", "eastcoast", "europe"]
+    },
+    "jupyter_token": {
+      "type": "string",
+      "default": "test",
+      "description": "Token for Jupyter notebook access"
+    },
+    "price_amount": {
+      "type": "number",
+      "default": 15,
+      "description": "Price amount in CST tokens",
+      "min": 1
+    }
+  },
+  "example_requests": [
+    "Deploy Stable Diffusion for image generation",
+    "I need an AI art generation service with high memory",
+    "Setup SD WebUI with RTX 6000",
+    "Deploy image generation model in Europe region"
+  ]
+}

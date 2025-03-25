@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  yaml-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    restart: unless-stopped
+    volumes:
+      - ./templates:/app/templates
+      - ./yaml:/app/yaml

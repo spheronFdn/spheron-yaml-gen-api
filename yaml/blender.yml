@@ -1,0 +1,49 @@
+version: "1.0"
+
+services:
+  blender:
+    image: linuxserver/blender
+    pull_policy: IfNotPresent
+    expose:
+      - port: 8888
+        as: 8888
+        to:
+          - global: true
+      - port: 3000
+        as: 3000
+        to:
+          - global: true
+    env:
+
+
+profiles:
+  name: blender
+  duration: 24h
+  mode: provider
+  compute:
+    blender:
+      resources:
+        cpu:
+          units: 16
+        memory:
+          size: 64Gi
+        storage:
+          - size: 500Gi
+        gpu:
+          units: 1
+          attributes:
+            vendor:
+              nvidia:
+                - model: rtx6000-ada
+  placement:
+    westcoast:
+      pricing:
+        blender:
+          token: CST
+          amount: 1
+
+deployment:
+  blender:
+    westcoast:
+      profile: blender
+      count: 1

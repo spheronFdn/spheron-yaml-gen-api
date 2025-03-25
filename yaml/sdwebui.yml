@@ -1,0 +1,49 @@
+version: "1.0"
+
+services:
+  sd-webui:
+    image: spheronfdn/sd-jupyter:pytorch-2.4.1-cuda-enabled
+    pull_policy: IfNotPresent
+    expose:
+      - port: 7860
+        as: 7860
+        to:
+          - global: true
+      - port: 8888
+        as: 8888
+        to:
+          - global: true
+    env:
+      - JUPYTER_TOKEN=test
+profiles:
+  name: stable-diffusion-webui
+  duration: 1h
+  mode: provider
+  compute:
+    sd-webui:
+      resources:
+        cpu:
+          units: 16
+        memory:
+          size: 64Gi
+        storage:
+          size: 500Gi
+        gpu:
+          units: 1
+          attributes:
+            vendor:
+              nvidia:
+                - model: rtx6000-ada
+  placement:
+    westcoast:
+      attributes:
+      pricing:
+        sd-webui:
+          token: CST
+          amount: 15
+
+deployment:
+  sd-webui:
+    westcoast:
+      profile: sd-webui
+      count: 1

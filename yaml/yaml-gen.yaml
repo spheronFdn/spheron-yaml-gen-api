@@ -1,0 +1,38 @@
+version: "1.0"
+
+services:
+  yaml-gen:
+    image: saurrx/yaml-gen:latest
+    pull_policy: IfNotPresent
+    expose:
+      - port: 3000
+        as: 3000
+        to:
+          - global: true
+profiles:
+  name: yaml-gen
+  duration: 1h
+  mode: provider
+  compute:
+    yaml-gen:
+      resources:
+        cpu:
+          units: 4
+        memory:
+          size: 16Gi
+        storage:
+          size: 50Gi
+      
+  placement:
+    westcoast:
+      attributes:
+      pricing:
+        yaml-gen:
+          token: CST
+          amount: 15
+
+deployment:
+  yaml-gen:
+    westcoast:
+      profile: yaml-gen
+      count: 1

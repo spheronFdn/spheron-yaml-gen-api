@@ -1,0 +1,64 @@
+version: "1.0"
+
+services:
+  hunyuan3d:
+    image: spheronnetwork/jupyter-notebook:pytorch-2.4.1-cuda-enabled
+    pull_policy: IfNotPresent
+    expose:
+      - port: 3000
+        as: 3000
+        to:
+          - global: true
+      - port: 8000
+        as: 8000
+        to:
+          - global: true
+    env:
+      - JUPYTER_TOKEN=test
+    command:
+      - "bash"
+      - "-c"
+      - |
+        git clone https://github.com/Tencent/Hunyuan3D-2.git
+        cd Hunyuan3D-2
+        pip install -r requirements.txt
+        cd hy3dgen/texgen/custom_rasterizer
+        python setup.py install
+        cd ../../..
+        cd hy3dgen/texgen/differentiable_renderer
+        python setup.py install
+        cd ../../..
+        python gradio_app.py --model_path tencent/Hunyuan3D-2 --subfolder hunyuan3d-dit-v2-0 --texgen_model_path tencent/Hunyuan3D-2 --port 3000 --host 0.0.0.0
+
+profiles:
+  name: hunyuan3d
+  duration: 2h
+  mode: provider
+  compute:
+    hunyuan3d:
+      resources:
+        cpu:
+          units: 16
+        memory:
+          size: 64Gi
+        storage:
+          size: 500Gi
+        gpu:
+          units: 1
+          attributes:
+            vendor:
+              nvidia:
+                - model: rtx6000-ada
+
+  placement:
+    westcoast:
+      attributes:
+      pricing:
+        hunyuan3d:
+          token: CST
+          amount: 1
+deployment:
+  hunyuan3d:
+    westcoast:
+      profile: hunyuan3d
+      count: 1
