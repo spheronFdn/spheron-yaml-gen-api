@@ -13,7 +13,7 @@ const client = new OpenAI({
 });
 
 // Load all templates from the templates directory
-async function loadTemplates() {
+export async function loadTemplates() {
   const templatesDir = path.join(process.cwd(), "templates");
   const files = await fs.readdir(templatesDir);
   const templates = {};
@@ -30,7 +30,7 @@ async function loadTemplates() {
 }
 
 // Match user request to best template using LLM
-async function findBestTemplate(userRequest, templates) {
+export async function findBestTemplate(userRequest, templates) {
   const prompt = `
 You are a template matching system for Spheron Protocol deployments.
 Given a user's deployment request, find the most appropriate template from the available options.
@@ -69,7 +69,7 @@ If no template matches well (confidence < 0.8), return null for templateId.
 }
 
 // Extract parameters from user request
-async function extractParameters(userRequest, template) {
+export async function extractParameters(userRequest, template) {
   const prompt = `
 Given a user's deployment request and a template's parameters, extract appropriate parameter values.
 
@@ -104,7 +104,7 @@ Return a JSON object with extracted parameter values. Use template defaults if a
 }
 
 // Generate YAML from template and parameters
-function generateYaml(template, parameters) {
+export function generateYaml(template, parameters) {
   let yaml = template.base_yaml;
 
   // Replace all parameter placeholders
