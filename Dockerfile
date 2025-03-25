@@ -16,7 +16,7 @@ COPY . .
 FROM node:18-alpine
 
 # Create non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN addgroup -S nodegp && adduser -S nodeapp -G nodegp
 
 WORKDIR /app
 
@@ -28,10 +28,10 @@ COPY --from=builder /app/yaml ./yaml
 COPY --from=builder /app/node_modules ./node_modules
 
 # Set ownership to non-root user
-RUN chown -R appuser:appgroup /app
+RUN chown -R nodeapp:nodegp /app
 
 # Switch to non-root user
-USER appuser
+USER nodeapp
 
 # Expose port
 EXPOSE 3000

@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: spheronfdn/spheron-yaml-gen-api:latest
     ports:
       - "3000:3000"
     environment:
